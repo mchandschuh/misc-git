@@ -36,12 +36,9 @@ function promptForDefaultFileType()
 if [ "$#" -eq 0 ]; then
 	hasDefaultFileTypeDefined || promptForDefaultFileType
 	FILE="`git config run.default`";
-	DIR=$(dirname "${FILE}")
-	FNAME=$(basename "${FILE}")
-	cd $DIR
-	if [ ${FNAME: -4} == ".exe" ]; then
-		echo 'match'
-		eval "cmd.exe /c "$FNAME
+	if [ ${FILE: -4} == ".exe" ]; then
+		DIR=$(dirname "${FILE}")
+		eval "powershell.exe Start-Process -FilePath "$FILE" -WorkingDirectory "$DIR" -WindowStyle Maximized"
 	else
 		eval "$FNAME";
 	fi
