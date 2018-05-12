@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# check local configuration for default
+function hasDefaultFileTypeDefined()
+{
+	if [ -z `git config run.default` ]; then
+		return 1;
+	fi
+
+	return 0;
+}
+
+# prompt until valid filepath specified
+function promptForDefaultFileType()
+{
+	echo;
+	echo "  No default file is specified.";
+	echo "  Please specify a default file: ";
+    echo;
+	printf "    ";
+
+	DEFAULT_FILE="";
+	read DEFAULT_FILE;
+	
+	echo "READ: "$DEFAULT_FILE;
+	
+	if [ -f '"'$DEFAULT_FILE'"' ]; then
+		echo "The specified file '"$DEFAULT_FILE"'" does not exist;
+		promptForDefaultFileType;
+	fi
+
+	git config run.default $DEFAULT_FILE
+}
+
+# no arguments specified -- open default file
+if [ "$#" -eq 0 ]; then
+	hasDefaultFileTypeDefined || promptForDefaultFileType
+	FILE="`git config run.default`";
+	DIR=$(dirname "${FILE}")
+	FNAME=$(basename "${FILE}")
+	cd $DIR
+	if [ ${FNAME: -4} == ".exe" ]; then
+		echo 'match'
+		eval "cmd.exe /c "$FNAME
+	else
+		eval "$FNAME";
+	fi
+else
+	# arguments specified -- pipe them through to explorer.exe
+	eval $@;
+fi
