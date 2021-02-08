@@ -1,0 +1,37 @@
+#!/bin/sh
+
+
+if [[ $1 == "help" ]]; then
+	echo "Removes nuget packages matching a provided search term"
+	echo ""
+	echo "git nuget-cache-clean {search-term} {directory}"
+	echo ""
+	echo -e "\tsearch-term:\tOften a version string, supports wildcards, for example: "'"*16.2.0*"'
+	echo -e "\tdirectory:\tThe directory to search for packages to be removed"
+	echo -e "\t          \tThis defaults to your nuget package cache directory: ~/.nuget/packages"
+	echo ""
+	echo "Some use cases"
+	echo ""
+	echo "To remove all packages with version 16.2.0 from your nuget package cache"
+	echo -e "\tgit nuget-cache-clean "'*16.2.0*'
+	echo ""
+	echo "To remove all heman packages with version 16.2.0 from your nuget package cache"
+	echo -e "\tgit nuget-cache-clean "'heman*16.2.0*'
+	echo ""
+	echo "To remove all packages with version 16.2.0 from a local package directory"
+	echo -e "\tgit nuget-cache-clean "'heman*16.2.0*'" /c/path/to/package/directory"
+	
+	exit 0
+fi
+
+term=$1
+dir=${2:-~/.nuget/packages}
+
+cd $dir
+
+echo "Executing from $PWD"
+echo "find . -type d -name "$term" -exec rm -rf {} \;"
+find . -type d -name "*$term*" -exec rm -rf {} \;
+
+echo "find . -type d -name "$term" -exec rm {} \;"
+find . -type f -name "*$term*" -exec rm {} \;

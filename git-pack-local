@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if [[ $1 == "help" ]]; then
+	echo "Creates versioned nuget packages for all projects in a solution marked as IsPackable=true"
+	echo ""
+	echo "git pack-local {sln} {version} {output-directory} {args}"
+	echo ""
+	echo -e "\tsln:\t\t  Relative path to the solution file"
+	echo -e "\tversion:\t  The desired nuget package version number"
+	echo -e "\toutput-directory: The directory where packages will be placed"
+	echo -e "\targs: Additional arguments to pass, such as '-c Debug' for debug builds"
+	echo
+	echo "Some use cases"
+	echo
+	echo -e "Package heman assemblies in debug mode for faster iteration"
+	echo -e "\tgit pack-local ./src/heman.sln 16.2.0 /c/src/1konto/packages/heman '-c Debug'"
+	exit 0
+fi
+
+defaultSln=`git config open.default`
+echo $defaultSln
+sln=${1:-$defaultSln}
+version=$2
+output=${3:-/c/src/1konto/packages/heman}
+args=${4:-}
+echo $args
+
+echo "dotnet pack -p:Version=$version -o $output $1"
+dotnet pack -p:Version=$version $args -o $output $1
