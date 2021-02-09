@@ -1,29 +1,49 @@
 #!/bin/sh
 
+defaultSln=`git config open.default`
+unix=`date +%s`
 if [[ $1 == "help" ]]; then
 	echo "Creates versioned nuget packages for all projects in a solution marked as IsPackable=true"
 	echo ""
-	echo "git pack-local {sln} {version} {output-directory} {args}"
+	echo "git pack-local {version} {sln} {output-directory} {args}"
+	echo
+	echo -e "  version:"
+	echo -e "    The desired nuget package version number - defaults to 'ci-$unix'"
 	echo ""
-	echo -e "\tsln:\t\t  Relative path to the solution file"
-	echo -e "\tversion:\t  The desired nuget package version number"
-	echo -e "\toutput-directory: The directory where packages will be placed"
-	echo -e "\targs: Additional arguments to pass, such as '-c Debug' for debug builds"
+	echo -e "  sln:"
+	echo -e "    Relative path to the solution file - defaults to $defaultSln"
 	echo
-	echo "Some use cases"
+	echo -e "  output-directory:"
+	echo -e "    The directory where packages will be placed - defaults to /c/src/1konto/packages/`basename -s .sln $defaultSln`"
 	echo
-	echo -e "Package heman assemblies in debug mode for faster iteration"
-	echo -e "\tgit pack-local ./src/heman.sln 16.2.0 /c/src/1konto/packages/heman '-c Debug'"
+	echo -e "  args:"
+	echo -e "    Additional arguments to pass, by default -c Debug and --include-symbols are used"
+	echo
+	echo
+	echo "  Executed Command:"
+	echo -e "    dotnet pack -c Debug --include-symbols -p:Version=$version $args -o $output $sln"
+	echo
+	echo "  Some use cases:"
+	echo
+	echo -e "  Package heman assemblies in debug mode for faster iteration"
+	echo -e "    git pack-local 16.2.0 ./src/heman.sln /c/src/1konto/packages/heman"
 	exit 0
 fi
 
-defaultSln=`git config open.default`
-echo $defaultSln
-sln=${1:-$defaultSln}
-version=$2
-output=${3:-/c/src/1konto/packages/heman}
-args=${4:-}
-echo $args
+sln=${2:-$defaultSln}
 
-echo "dotnet pack -p:Version=$version -o $output $1"
-dotnet pack -p:Version=$version $args -o $output $1
+version=${1:-0.0.0-ci-$unix}
+
+dir=`basename -s .sln $defaultSln`
+output=${3:-/c/src/1konto/packages/$dir}
+
+args=${4:-}
+
+echo
+echo "dotnet pack -c Debug --include-symbols -p:Version=$version $args -o $output $sln"
+echo
+
+dotnet pack -c Debug --include-symbols -p:Version=$version $args -o $output $sln
+
+echo
+echo "Packaged version $version saved to $output"
